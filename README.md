@@ -479,12 +479,6 @@ copies or substantial portions of the Software.
 
 ---
 
-## 📧 Contact
-
-**Kushal Adhyaru**
-- GitHub: [@kushal511](https://github.com/kushal511)
-- Email: kushal.adhyaru@sjsu.edu
-
 ---
 
 ## 🙏 Acknowledgments
