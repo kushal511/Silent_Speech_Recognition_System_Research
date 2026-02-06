@@ -450,34 +450,6 @@ Silent_Speech_Recognition_System/
 
 ---
 
-## 🤝 Contributing
-
-Contributions are welcome! Here's how you can help:
-
-1. **Report Bugs**: Open an issue with detailed description
-2. **Suggest Features**: Propose enhancements via issues
-3. **Submit PRs**: Fork, create branch, make changes, submit PR
-4. **Improve Docs**: Help make documentation clearer
-5. **Share Results**: Report your preprocessing results
-
-### Development Setup
-
-```bash
-# Clone and setup
-git clone https://github.com/kushal511/Silent_Speech_Recognition_System.git
-cd Silent_Speech_Recognition_System
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-
-# Run tests
-python3 run_smoke_test.py --data_root test_lrw_dataset/data
-
-# Make changes and test
-python3 verify_smoke_test_setup.py
-```
-
----
 
 ## 📜 License
 
@@ -498,36 +470,6 @@ furnished to do so, subject to the following conditions:
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 ```
-
----
-
-## 📚 Citation
-
-If you use this preprocessing pipeline in your research, please cite:
-
-```bibtex
-@software{adhyaru2024ssr_preprocessing,
-  author = {Adhyaru, Kushal},
-  title = {Silent Speech Recognition Preprocessing Pipeline},
-  year = {2024},
-  url = {https://github.com/kushal511/Silent_Speech_Recognition_System}
-}
-```
-
-For the LRW dataset:
-
-```bibtex
-@inproceedings{chung2016lip,
-  title={Lip reading in the wild},
-  author={Chung, Joon Son and Zisserman, Andrew},
-  booktitle={Asian Conference on Computer Vision},
-  pages={87--103},
-  year={2016},
-  organization={Springer}
-}
-```
-
----
 
 ## 🔗 Resources
 
