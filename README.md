@@ -45,14 +45,6 @@ Silent Speech Recognition (SSR) aims to recognize spoken words from visual infor
 - Generate consistent, high-quality training data for SSR models
 - Provide comprehensive validation and quality control
 
-### 🔬 Research Context
-
-This pipeline is designed for the **Lip Reading in the Wild (LRW)** dataset, which contains:
-- 500,000+ video clips
-- 500 different words
-- 1,000+ speakers
-- Real-world, unconstrained conditions
-
 ---
 
 ## ✨ Features
