@@ -1,0 +1,71 @@
+# LRW Preprocessing Configuration
+
+# Dataset settings
+dataset:
+  root_dir: "test_lrw_dataset/data"  # Path to extracted dataset
+  video_dir: "s1"  # Subdirectory containing video files
+  alignment_dir: "alignments/s1"  # Subdirectory containing alignment files
+  video_extension: ".mpg"  # Video file extension
+
+# Face detection settings
+face_detection:
+  method: "mediapipe"  # Options: "mediapipe", "dlib"
+  confidence_threshold: 0.5
+  model_selection: 0  # MediaPipe: 0 for short-range (< 2m), 1 for full-range
+
+# Landmark extraction settings
+landmarks:
+  method: "mediapipe"  # Options: "mediapipe", "dlib"
+  # Lip landmark indices (MediaPipe 468-point model uses different indices than dlib)
+  # For MediaPipe, we use the mouth region indices
+  # For dlib 68-point model: indices 48-67 (20 points)
+  lip_indices_dlib: [48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67]
+  # MediaPipe mouth indices (subset of 468 points)
+  lip_indices_mediapipe: [61, 185, 40, 39, 37, 0, 267, 269, 270, 409, 291, 375, 321, 405, 314, 17, 84, 181, 91, 146]
+
+# Mouth ROI settings
+mouth_roi:
+  padding_factor: 0.3  # Add 30% padding around lip landmarks bounding box
+  min_size: 64  # Minimum ROI dimension (pixels)
+  max_size: 128  # Maximum ROI dimension (pixels)
+  target_size: [96, 96]  # Final crop size [height, width]
+  aspect_ratio: 1.0  # Force square crops
+
+# Temporal smoothing settings
+smoothing:
+  enabled: true
+  window_size: 5  # Smooth over 5 frames (must be odd)
+  method: "gaussian"  # Options: "gaussian", "moving_average"
+  sigma: 1.0  # For gaussian smoothing
+
+# Video processing settings
+video:
+  expected_frames: 29  # LRW standard
+  frame_format: "png"  # Output format for cropped frames
+  normalize: true  # Normalize pixel values to [0, 1]
+
+# Processing settings
+processing:
+  num_workers: 4  # Number of parallel workers
+  batch_size: 1  # Videos per batch (keep at 1 for memory efficiency)
+  skip_existing: true  # Skip already processed videos
+  max_videos: null  # Limit number of videos (null = process all)
+
+# Quality control thresholds
+quality:
+  min_face_detection_rate: 0.8  # Warn if < 80% frames have faces
+  max_landmark_variance: 50.0  # Flag high-variance landmark sequences
+  min_roi_size: 32  # Minimum acceptable ROI size
+
+# Logging settings
+logging:
+  level: "INFO"  # Options: "DEBUG", "INFO", "WARNING", "ERROR"
+  log_dir: "logs"
+  save_failed_videos: true  # Save list of failed videos
+
+# Debug settings
+debug:
+  enabled: false
+  visualize: false  # Show visualization windows
+  save_debug_images: false  # Save annotated frames
+  debug_output_dir: "debug_output"

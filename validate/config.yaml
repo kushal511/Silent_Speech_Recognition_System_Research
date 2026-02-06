@@ -1,0 +1,72 @@
+# LRW Validation Pipeline Configuration
+
+# Shape validation
+expected_frames: 29
+expected_landmarks: 20
+expected_roi_size: [96, 96]
+
+# Detection quality tiers
+detection_thresholds:
+  good: 0.90
+  ok: 0.80
+
+# Temporal stability thresholds
+temporal_stability:
+  bbox_displacement_std_threshold: 10.0
+  bbox_area_variance_threshold: 100.0
+  landmark_motion_threshold: 15.0
+  max_jump_threshold: 30.0
+
+# ROI consistency thresholds
+roi_validation:
+  tight_threshold: 0.7
+  loose_threshold: 1.5
+  area_variance_threshold: 50.0
+
+# Visualization settings
+visualization:
+  num_samples: 20
+  random_seed: 42
+  gif_fps: 25
+  landmark_color: [0, 255, 0]  # Green
+  bbox_color: [255, 0, 0]      # Red
+  marker_size: 3
+  line_thickness: 2
+
+# Processing settings
+processing:
+  batch_size: 100
+  num_workers: 4
+  skip_existing: true
+
+# Output settings
+output:
+  save_visualizations: true
+  save_gifs: true
+  save_reports: true
+  debug_mode: false
+
+# Logging settings
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  log_dir: "logs"
+  save_to_file: true
+
+# LRW Dataset Download Settings
+download:
+  # Official LRW dataset information
+  dataset_url: "http://www.robots.ox.ac.uk/~vgg/data/lip_reading/lrw1.html"
+  
+  # Dataset size information
+  dataset_size_gb: 50
+  num_videos: 1000  # Approximate per word class
+  num_word_classes: 500
+  
+  # Download settings
+  chunk_size: 8192  # Bytes per chunk for streaming download
+  max_retries: 3
+  timeout: 300  # Seconds
+  
+  # Verification
+  verify_checksums: true
+  verify_video_count: true
