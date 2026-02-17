@@ -1,11 +1,13 @@
-# LRW Preprocessing Configuration
+# LRW Preprocessing Configuration - For Testing/Demo with GRID Data
+# Use this config for testing with the s1 sample data
+# For full LRW dataset processing, use config_lrw.yaml instead
 
 # Dataset settings
 dataset:
-  root_dir: "test_lrw_dataset/data"  # Path to extracted dataset
-  video_dir: "s1"  # Subdirectory containing video files
+  root_dir: "lrw_dataset/data"  # Path to test dataset
+  video_dir: "s1"  # Subdirectory containing video files (flat structure for GRID/test data)
   alignment_dir: "alignments/s1"  # Subdirectory containing alignment files
-  video_extension: ".mpg"  # Video file extension
+  video_extension: ".mpg"  # Video file extension for test data
 
 # Face detection settings
 face_detection:
@@ -31,12 +33,14 @@ mouth_roi:
   target_size: [96, 96]  # Final crop size [height, width]
   aspect_ratio: 1.0  # Force square crops
 
-# Temporal smoothing settings
+# Temporal smoothing settings (REMOVED - not required)
+# Temporal smoothing has been removed from the pipeline as per requirements
+# Each frame is processed independently
 smoothing:
-  enabled: true
-  window_size: 5  # Smooth over 5 frames (must be odd)
-  method: "gaussian"  # Options: "gaussian", "moving_average"
-  sigma: 1.0  # For gaussian smoothing
+  enabled: false  # Kept for backward compatibility but not used
+  window_size: 5
+  method: "gaussian"
+  sigma: 1.0
 
 # Video processing settings
 video:

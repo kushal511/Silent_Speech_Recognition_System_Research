@@ -19,7 +19,6 @@ from tqdm import tqdm
 from src.video_io import VideoReader
 from src.face_landmarks import FaceLandmarkExtractor, interpolate_missing_landmarks
 from src.mouth_roi import MouthROIExtractor, fill_missing_roi_boxes
-from src.smoothing import TemporalSmoother, smooth_landmark_results, smooth_roi_results
 from src.save_utils import OutputSaver
 
 logger = logging.getLogger(__name__)
@@ -583,7 +582,6 @@ class SmallBatchTester:
             processing_info = {
                 'face_detection_rate': sum(1 for r in landmark_results if r['face_detected']) / len(landmark_results),
                 'num_valid_crops': len(valid_crops),
-                'smoothing_applied': False,
                 'roi_boxes': [r['roi_box'] for r in roi_results],
                 'crop_size': self.config['mouth_roi']['target_size']
             }

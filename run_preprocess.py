@@ -22,7 +22,7 @@ from src.dataset import LRWDataset, VideoSample, validate_dataset_structure
 from src.video_io import VideoReader
 from src.face_landmarks import FaceLandmarkExtractor, interpolate_missing_landmarks
 from src.mouth_roi import MouthROIExtractor, fill_missing_roi_boxes
-from src.smoothing import TemporalSmoother, smooth_landmark_results, smooth_roi_results
+# Temporal smoothing removed as per requirements
 from src.save_utils import OutputSaver, save_failed_videos_list, save_processing_summary
 from src.visualize_debug import PreprocessingVisualizer
 
@@ -73,13 +73,8 @@ class PreprocessingPipeline:
             aspect_ratio=config['mouth_roi']['aspect_ratio']
         )
         
+        # Temporal smoothing removed as per requirements
         self.smoother = None
-        if config['smoothing']['enabled']:
-            self.smoother = TemporalSmoother(
-                window_size=config['smoothing']['window_size'],
-                method=config['smoothing']['method'],
-                sigma=config['smoothing']['sigma']
-            )
         
         self.output_saver = None  # Initialized when output_dir is known
         
@@ -134,9 +129,7 @@ class PreprocessingPipeline:
                     f"{face_detection_rate:.1%}"
                 )
             
-            # Step 3: Apply temporal smoothing to landmarks
-            if self.smoother:
-                landmark_results = smooth_landmark_results(landmark_results, self.smoother)
+            # Step 3: Temporal smoothing removed as per requirements
             
             # Step 4: Compute mouth ROIs
             roi_results = self.roi_extractor.process_video_frames(frames, landmark_results)
@@ -144,9 +137,7 @@ class PreprocessingPipeline:
             # Fill missing ROI boxes
             roi_results = fill_missing_roi_boxes(roi_results)
             
-            # Step 5: Apply temporal smoothing to ROI boxes
-            if self.smoother:
-                roi_results = smooth_roi_results(roi_results, self.smoother)
+            # Step 5: Temporal smoothing removed as per requirements
             
             # Step 6: Extract cropped mouth regions
             mouth_crops = []
@@ -179,7 +170,6 @@ class PreprocessingPipeline:
             processing_info = {
                 'face_detection_rate': face_detection_rate,
                 'num_valid_crops': len(valid_crops),
-                'smoothing_applied': self.smoother is not None,
                 'roi_boxes': [r['roi_box'] for r in roi_results],
                 'crop_size': self.config['mouth_roi']['target_size']
             }

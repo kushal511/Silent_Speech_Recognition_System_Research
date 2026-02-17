@@ -52,10 +52,9 @@ Silent Speech Recognition (SSR) aims to recognize spoken words from visual infor
 ### Core Capabilities
 
 - 🎥 **Robust Video Processing**: Handles various video formats (.mp4, .mpg) with error recovery
-- 👤 **Face Detection**: OpenCV Haar Cascade with 100% detection rate on test data
-- 📍 **Landmark Extraction**: 68-point facial landmarks with 20-point lip focus
-- 🎯 **ROI Computation**: Intelligent mouth region extraction with adaptive padding
-- 🌊 **Temporal Smoothing**: Gaussian filtering to reduce frame-to-frame jitter
+- 👤 **Accurate Face Detection**: MediaPipe Face Mesh or dlib for precise facial landmark detection
+- 📍 **Exact Landmark Extraction**: Targets actual lip boundaries (upper and lower lips separated)
+- 🎯 **ROI Computation**: Intelligent mouth region extraction based on exact lip boundaries
 - 💾 **Structured Output**: Organized data format ready for PyTorch/TensorFlow
 - ⚡ **Multiprocessing**: Parallel processing for faster throughput
 - 🔍 **Quality Control**: Comprehensive validation and smoke testing
@@ -64,7 +63,8 @@ Silent Speech Recognition (SSR) aims to recognize spoken words from visual infor
 ### Technical Highlights
 
 - **CPU-Only**: No GPU required for preprocessing
-- **Production-Ready**: Tested on 1000+ videos with 100% success rate
+- **Accurate Detection**: MediaPipe/dlib for precise lip boundary targeting
+- **Production-Ready**: Tested on 1000+ videos with high success rate
 - **Configurable**: YAML-based configuration for easy experimentation
 - **Resumable**: Skip already processed videos automatically
 - **Validated**: Comprehensive smoke tests and output verification
@@ -86,34 +86,29 @@ Silent Speech Recognition (SSR) aims to recognize spoken words from visual infor
                              ▼
                     ┌────────────────┐
                     │ Face Detection │
-                    │  (Haar Cascade)│
+                    │ (MediaPipe/dlib)│
                     └────────┬───────┘
                              │
                              ▼
                     ┌────────────────┐
                     │   Landmark     │
                     │  Extraction    │
-                    │  (68 points)   │
+                    │ (Exact Boundaries)│
                     └────────┬───────┘
                              │
                              ▼
                     ┌────────────────┐
                     │  Lip Landmark  │
                     │   Selection    │
-                    │  (20 points)   │
-                    └────────┬───────┘
-                             │
-                             ▼
-                    ┌────────────────┐
-                    │   Temporal     │
-                    │   Smoothing    │
-                    │  (Gaussian)    │
+                    │ (Upper & Lower)│
                     └────────┬───────┘
                              │
                              ▼
                     ┌────────────────┐
                     │  Mouth ROI     │
                     │  Computation   │
+                    │ (From Exact    │
+                    │  Boundaries)   │
                     └────────┬───────┘
                              │
                              ▼
@@ -126,7 +121,7 @@ Silent Speech Recognition (SSR) aims to recognize spoken words from visual infor
 ┌────────────────────────────────────────────────────────────────┐
 │              Preprocessed Output (Ready for Training)          │
 │  • Mouth frames: 29 × 96×96 RGB images                        │
-│  • Lip landmarks: 29 × 20 × 2 coordinates                     │
+│  • Lip landmarks: 29 × N × 2 coordinates (exact boundaries)   │
 │  • Metadata: Processing statistics & quality metrics          │
 └────────────────────────────────────────────────────────────────┘
 ```
@@ -294,37 +289,31 @@ python3 run_preprocess.py \
 - Validates frame count (expected: 29 frames)
 - Handles corrupt/missing videos gracefully
 
-### Stage 2: Face Detection
-- Detects faces using OpenCV Haar Cascade
-- Processes each frame independently
-- Achieves 100% detection rate on test data
-- Provides confidence scores
+### Stage 2: Face Detection & Landmark Extraction
+- Uses MediaPipe Face Mesh (primary) or dlib (fallback)
+- Detects faces and extracts precise facial landmarks
+- Targets exact facial feature boundaries
+- Provides high-quality landmark coordinates
 
-### Stage 3: Landmark Extraction
-- Estimates 68 facial landmark points
-- Focuses on mouth region (20 points)
-- Interpolates missing detections
-- Tracks landmarks across frames
+### Stage 3: Lip Landmark Selection
+- Extracts lip-specific landmarks from full face landmarks
+- Separates upper and lower lip boundaries correctly
+- MediaPipe: Uses specific indices for outer/inner lip contours
+- dlib: Uses points 48-67 for complete lip region
 
-### Stage 4: Temporal Smoothing
-- Applies Gaussian filtering (σ=1.0, window=5)
-- Reduces frame-to-frame jitter
-- Smooths both landmarks and ROI boxes
-- Preserves overall motion patterns
-
-### Stage 5: ROI Computation
-- Calculates bounding box from lip landmarks
+### Stage 4: ROI Computation
+- Calculates bounding box from exact lip boundary landmarks
 - Adds 30% padding around mouth
 - Enforces size constraints (64-128 pixels)
 - Maintains square aspect ratio (1:1)
 
-### Stage 6: Mouth Cropping
+### Stage 5: Mouth Cropping
 - Extracts mouth region from each frame
 - Resizes to consistent 96×96 pixels
 - Preserves RGB color information
 - Handles edge cases (partial faces)
 
-### Stage 7: Output Saving
+### Stage 6: Output Saving
 - Saves frames as PNG images
 - Saves landmarks as NumPy arrays (.npy)
 - Saves metadata as JSON
@@ -334,30 +323,61 @@ python3 run_preprocess.py \
 
 ## ⚙️ Configuration
 
-Edit `config.yaml` to customize pipeline behavior:
+The project includes two configuration files:
+
+### config.yaml (Testing/Demo)
+For testing and demos with sample GRID data (s1 directory):
+```yaml
+dataset:
+  video_dir: "s1"  # Flat structure for test data
+  video_extension: ".mpg"
+```
+
+Use with:
+```bash
+python3 demo_multiple_frames.py
+python3 run_smoke_test.py lrw_dataset/data
+```
+
+### config_lrw.yaml (Production)
+For processing the complete LRW dataset:
+```yaml
+dataset:
+  video_dir: null  # Hierarchical structure (WORD_CLASS/SPLIT/)
+  video_extension: ".mp4"
+```
+
+Use with:
+```bash
+python3 run_preprocess.py \
+    --input_dir /path/to/lrw \
+    --output_dir processed_lrw \
+    --config config_lrw.yaml
+```
+
+### Key Configuration Options
 
 ```yaml
-# Face Detection
+# Face Detection (MediaPipe/dlib for accurate lip boundaries)
 face_detection:
-  confidence_threshold: 0.5  # Lower = more detections
+  confidence_threshold: 0.5  # Minimum detection confidence
+  model_selection: 0         # MediaPipe model (0 or 1)
   
 # Mouth ROI
 mouth_roi:
   padding_factor: 0.3        # 30% padding around lips
   target_size: [96, 96]      # Output dimensions
-  
-# Temporal Smoothing
-smoothing:
-  enabled: true
-  window_size: 5             # Must be odd
-  method: "gaussian"         # or "moving_average"
-  sigma: 1.0                 # Smoothing strength
+  min_size: 64               # Minimum ROI size
+  max_size: 128              # Maximum ROI size
   
 # Processing
 processing:
   num_workers: 4             # Parallel workers
   skip_existing: true        # Resume capability
+  max_videos: null           # Limit for testing
 ```
+
+**Note**: Temporal smoothing has been removed from the pipeline as it's not required. Each frame is processed independently.
 
 ---
 
@@ -367,9 +387,10 @@ processing:
 
 | Metric | Value |
 |--------|-------|
-| **Face Detection Rate** | 100% |
+| **Face Detection** | MediaPipe/dlib accurate detection |
+| **Landmark Accuracy** | Targets exact lip boundaries |
 | **Processing Speed** | 2-5 seconds/video |
-| **Success Rate** | 100% (1000 videos tested) |
+| **Success Rate** | High (tested on 1000+ videos) |
 | **Output Quality** | 96×96 RGB, no artifacts |
 | **Memory Usage** | ~500 MB per worker |
 
@@ -384,7 +405,7 @@ processed_lrw/
 │   │   │   │   ├── frame_00.png  # 96×96 RGB
 │   │   │   │   ├── frame_01.png
 │   │   │   │   └── ... (29 frames)
-│   │   │   ├── landmarks.npy      # (29, 20, 2)
+│   │   │   ├── landmarks.npy      # (29, N, 2) - exact boundaries
 │   │   │   └── metadata.json
 │   │   └── VIDEO_002/
 │   ├── val/
@@ -396,9 +417,9 @@ processed_lrw/
 ### Quality Assurance
 
 - ✅ All frames validated for correct dimensions
+- ✅ Landmarks target exact upper and lower lip boundaries
 - ✅ Landmarks checked for NaN/infinity values
 - ✅ ROI boxes verified within frame bounds
-- ✅ Temporal consistency validated
 - ✅ Visual inspection via debug images
 
 ---

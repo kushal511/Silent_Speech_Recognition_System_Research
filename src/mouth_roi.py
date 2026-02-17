@@ -53,10 +53,14 @@ class MouthROIExtractor:
                        lip_landmarks: np.ndarray,
                        frame_shape: Tuple[int, int]) -> Optional[Tuple[int, int, int, int]]:
         """
-        Compute bounding box for mouth ROI from lip landmarks.
+        Compute bounding box for mouth ROI from exact lip boundary landmarks.
+        
+        The lip landmarks target the exact upper and lower lip boundaries,
+        so the bounding box will accurately encompass the mouth region.
         
         Args:
             lip_landmarks: Lip landmarks array (num_points, 2) with (x, y) coordinates
+                          targeting exact lip boundaries
             frame_shape: Frame dimensions (height, width)
         
         Returns:
@@ -67,14 +71,15 @@ class MouthROIExtractor:
             return None
         
         try:
-            # Get bounding box of lip landmarks
+            # Get exact bounding box from lip boundary landmarks
             x_coords = lip_landmarks[:, 0]
             y_coords = lip_landmarks[:, 1]
             
+            # Find exact boundaries (min/max of actual lip boundary points)
             x_min, x_max = np.min(x_coords), np.max(x_coords)
             y_min, y_max = np.min(y_coords), np.max(y_coords)
             
-            # Compute center and size
+            # Compute center and size based on exact boundaries
             center_x = (x_min + x_max) / 2
             center_y = (y_min + y_max) / 2
             width = x_max - x_min

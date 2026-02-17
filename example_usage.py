@@ -14,13 +14,11 @@ def example_single_video():
     from src.video_io import VideoReader
     from src.face_landmarks import FaceLandmarkExtractor
     from src.mouth_roi import MouthROIExtractor
-    from src.smoothing import TemporalSmoother, smooth_landmark_results, smooth_roi_results
     
     # Initialize components
     video_reader = VideoReader(expected_frames=29)
     landmark_extractor = FaceLandmarkExtractor(confidence_threshold=0.5)
     roi_extractor = MouthROIExtractor(target_size=(96, 96))
-    smoother = TemporalSmoother(window_size=5, method='gaussian')
     
     # Load video
     video_path = "path/to/video.mp4"
@@ -29,15 +27,11 @@ def example_single_video():
     if frames is not None:
         print(f"Loaded {len(frames)} frames")
         
-        # Extract landmarks
+        # Extract landmarks (targets exact lip boundaries)
         landmark_results = landmark_extractor.process_video_frames(frames)
         
-        # Apply smoothing
-        landmark_results = smooth_landmark_results(landmark_results, smoother)
-        
-        # Extract mouth ROIs
+        # Extract mouth ROIs (based on exact lip boundaries)
         roi_results = roi_extractor.process_video_frames(frames, landmark_results)
-        roi_results = smooth_roi_results(roi_results, smoother)
         
         # Get cropped mouths
         mouth_crops = []
